@@ -24,9 +24,8 @@ class MyApp extends StatelessWidget {
         ),
         home: MultiBlocProvider(
           providers: [
-
-        BlocProvider(create: (context)=>CounterBloc()),
-        BlocProvider(create: (context)=>VisiblityBloc()),
+            BlocProvider(create: (context) => CounterBloc()),
+            BlocProvider(create: (context) => VisiblityBloc()),
           ],
           child: const MyHomePage(),
         ));
@@ -48,7 +47,13 @@ class MyHomePage extends StatelessWidget {
             const Text(
               'You have pushed the button this many times:',
             ),
-            BlocBuilder<CounterBloc, CounterState>(
+            BlocConsumer<CounterBloc, CounterState>(
+                listener: (context, state) {
+                if (state.count == 3) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("Counter value is: ${state.count}")));
+                }
+              },
                 buildWhen: (previous, current) {
               debugPrint("Previous Count ${previous.count}");
               debugPrint("Current Count ${current.count}");
@@ -62,16 +67,24 @@ class MyHomePage extends StatelessWidget {
               );
             }),
             BlocBuilder<VisiblityBloc, VisibilityState>(
-              
                 builder: (context, state) {
-                  return Visibility(
-                      visible: state.show,
-                      child: Container(
-                        color: Colors.purple,
-                        height: 200,
-                        width: 200,
-                      ));
-                })
+              return Visibility(
+                  visible: state.show,
+                  child: Container(
+                    color: Colors.purple,
+                    height: 200,
+                    width: 200,
+                  ));
+            }),
+            BlocListener<CounterBloc, CounterState>(
+              listener: (context, state) {
+                if (state.count == 3) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("Counter value is: ${state.count}")));
+                }
+              },
+              child: const Text("Counter State Listener"),
+            )
           ],
         ),
       ),
@@ -101,7 +114,6 @@ class MyHomePage extends StatelessWidget {
           FloatingActionButton(
             onPressed: () {
               context.read<VisiblityBloc>().add(VisiblityHideEvent());
-
             },
             child: const Text("Hide"),
           ),
